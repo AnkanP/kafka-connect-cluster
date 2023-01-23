@@ -1,0 +1,54 @@
+{
+  "name": "s3-key-value-sink-customer",
+  "config": {
+    "connector.class": "io.confluent.connect.s3.S3SinkConnector",
+    "tasks.max": "2",
+    "topics": "s3-kubernetes-test-demo",
+    "s3.region": "us-west-2",
+    "s3.bucket.name": "${ssm:BUCKET_NAME}",
+    "s3.part.size": "5242880",
+    "flush.size": "3",
+    "storage.class": "io.confluent.connect.s3.storage.S3Storage",
+    "format.class": "io.confluent.connect.s3.format.parquet.ParquetFormat",
+    "schema.generator.class": "io.confluent.connect.storage.hive.schema.DefaultSchemaGenerator",
+
+    "schema.compatibility": "NONE",
+    "name": "s3-key-value-sink-customer",
+	"rotate.interval.ms": 60000,
+    "rotate.schedule.interval.ms": 60000,
+	"parquet.codec": "snappy",
+
+
+	"value.converter": "io.confluent.connect.avro.AvroConverter",
+	"value.converter.schema.registry.url": "http://schema-registry:8089",
+    "key.converter": "io.confluent.connect.avro.AvroConverter",
+	"key.converter.schema.registry.url": "http://schema-registry:8089",
+
+    "s3.object.tagging": true,
+    "s3.part.retries": 3,
+    "s3.retry.backoff.ms": 200,
+    "topics.dir": "topics",
+    "file.delim": "+",
+    "directory.delim": "/",
+    "store.kafka.keys": false,
+     "locale": "en-GB",
+    "timezone": "Europe/London",
+
+    "partitioner.class": "com.example.TimeAndPartitionBasedPartitioner",
+    "partition.duration.ms": "60000",
+    "path.format": "YYYYMMDD",
+
+
+    "timestamp.extractor": "Wallclock",
+    "timestamp.field": "timestamp",
+
+    "transforms" : "insertfields",
+    "transforms.insertfields.type":"com.example.InsertFields$Value",
+    "transforms.insertfields.op.field.name":"operation",
+    "transforms.insertfields.timestamp.field.name":"timestamp",
+
+    "config.providers":"ssm" ,
+    "config.providers.ssm.class": "org.crawlerp.example.ConnectConfigProviderWithAwsParamStoreImpl"
+
+  }
+}
