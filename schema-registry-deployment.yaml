@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: avro-schema-registry
+  name: avro-schema-registry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: avro-schema-registry
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: avro-schema-registry
+    spec:
+      hostname: avro-schema-registry
+      containers:
+        - env:
+            - name: SCHEMA_REGISTRY_HOST_NAME
+              value: avro-schema-registry
+            - name: SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS
+              value: broker:29092
+            - name: SCHEMA_REGISTRY_LISTENERS
+              value: http://avro-schema-registry:8089
+          image: confluentinc/cp-schema-registry:7.0.1
+          name: avro-schema-registry
+          ports:
+            - containerPort: 8089
+          resources: {}
+          volumeMounts:
+            - mountPath: /data
+              name: avro-schema-registry-pvc
+      volumes:
+        - name: avro-schema-registry-pvc
+          persistentVolumeClaim:
+            claimName: avro-schema-registry-pvc
+
+      restartPolicy: Always
+status: {}

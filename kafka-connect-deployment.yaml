@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kafka-connect-cluster
+  name: kafka-connect-cluster
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-connect-cluster
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: kafka-connect-cluster
+    spec:
+      containers:
+        - env:
+            - name: SCHEMA_REGISTRY_URL
+              value: http://avro-schema-registry-service:8089
+            - name: AWS_REGION
+              value: "us-west-2"
+            - name: AWS_ACCESS_KEY_ID
+              value: "AKIASFVXOGEVG52GVJU2"
+            - name: AWS_SECRET_ACCESS_KEY
+              value: "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"
+            - name: CONNECT_BOOTSTRAP_SERVERS
+              value: broker:29092
+            - name: CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR
+              value: "1"
+            - name: CONNECT_CONFIG_STORAGE_TOPIC
+              value: _connect-configs
+            - name: CONNECT_GROUP_ID
+              value: kafka-connect
+            - name: CONNECT_KEY_CONVERTER
+              value: org.apache.kafka.connect.storage.StringConverter
+            - name: CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN
+              value: '[%d] %p %X{connector.context}%m (%c:%L)%n'
+            - name: CONNECT_LOG4J_LOGGERS
+              value: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
+            - name: CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR
+              value: "1"
+            - name: CONNECT_OFFSET_STORAGE_TOPIC
+              value: _connect-offsets
+            - name: CONNECT_PLUGIN_PATH
+              value: /usr/share/java,/usr/share/confluent-hub-components,/tmp/connect-jars/custom-plugin
+            - name: CONNECT_REST_ADVERTISED_HOST_NAME
+              value: kafka-connect-cluster
+            - name: CONNECT_REST_PORT
+              value: "8083"
+            - name: CONNECT_STATUS_STORAGE_REPLICATION_FACTOR
+              value: "1"
+            - name: CONNECT_STATUS_STORAGE_TOPIC
+              value: _connect-status
+            - name: CONNECT_VALUE_CONVERTER
+              value: io.confluent.connect.avro.AvroConverter
+            - name: CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL
+              value: http://avro-schema-registry-service:8089
+          image: crawlerp/kafka-connect-cluster-v1:1.0.8
+          imagePullPolicy: Always
+          name: kafka-connect-cluster
+          ports:
+            - containerPort: 8083
+          resources: {}
+          volumeMounts:
+            - mountPath: /data
+              name: kafka-connect-pvc
+      restartPolicy: Always
+      volumes:
+        - name: kafka-connect-pvc
+          persistentVolumeClaim:
+            claimName: kafka-connect-pvc
+
+status: {}
